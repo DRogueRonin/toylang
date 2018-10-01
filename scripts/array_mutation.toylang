@@ -1,0 +1,17 @@
+let arr = [1, 2, 3];
+println "arr: ", arr;
+
+arr[2] = 4;
+println "a2(4): ", arr[2];
+
+arr[2] += 1;
+println "a2(5): ", arr[2];
+
+arr[2] *= 5;
+println "a2(25): ", arr[2];
+
+arr[2] -= 13;
+println "a2(12): ", arr[2];
+
+arr[2] **= 2;
+println "a2(144): ", arr[2];

@@ -126,6 +126,63 @@ fn run_statement(mut global_vars: &mut VarMap, statement: Statement) -> Result<O
                 },
             }
         },
+        Statement::MutateArr(op, ident, idx, expr) => {
+            let name = Ident::new(ident)?.0;
+
+            if let None = global_vars.get(&name) {
+                return Err(format!("undeclared variable: {}", name));
+            }
+
+            let index_expr = eval_expr(&global_vars, &idx)?;
+            let index = match index_expr {
+                Value::Num(index) => Ok(index as usize), // as usize to access Vec<> elements
+                _ => Err(format!("{} cannot be used as index", index_expr.get_type())),
+            }?;
+
+            let value = global_vars.get(&name).unwrap().clone();
+            let rhs = eval_expr(&global_vars, &expr)?;
+
+            let mut arr = match value {
+                Value::Array(arr) => arr, // get Vec<Value>
+                _ => unreachable!(),
+            };
+
+            match op {
+                AssignOp::Equals => {
+                    arr[index] = rhs;
+                },
+                _ => {
+                    if let (&Value::Num(old), Value::Num(new)) = (&arr[index], rhs) {
+                        let new_value;
+                        match op {
+                            AssignOp::AddEq => {
+                                new_value = old + new;
+                            },
+                            AssignOp::SubEq => {
+                                new_value = old - new;
+                            },
+                            AssignOp::MulEq => {
+                                new_value = old * new;
+                            },
+                            AssignOp::DivEq => {
+                                new_value = old / new;
+                            },
+                            AssignOp::ModEq => {
+                                new_value = old % new;
+                            },
+                            AssignOp::ExpEq => {
+                                new_value = old.powf(new);
+                            },
+                            _ => unreachable!(),
+                        }
+                        arr[index] = Value::Num(new_value);
+                    } else {
+                        return Err(format!("= is the only valid assignment operator for {}", arr[index].get_type()));
+                    }
+                },
+            }
+            global_vars.insert(name, Value::Array(arr));
+        },
         Statement::Expression(expression) => {
             eval_expr(&global_vars, &expression)?;
         }

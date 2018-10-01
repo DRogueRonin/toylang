@@ -47,6 +47,17 @@ mod tests {
     }
 
     #[test]
+    fn mutate_arrays() {
+        assert!(statement("foo = [1];").is_ok());
+        assert!(statement("foo[0] *= 2;").is_ok());
+        assert!(statement("foo[0] /= 3;").is_ok());
+        assert!(statement("foo[0] += 4;").is_ok());
+        assert!(statement("foo[0] -= 5;").is_ok());
+        assert!(statement("foo[0] %= 6;").is_ok());
+        assert!(statement("foo[0] **= 7;").is_ok());
+    }
+
+    #[test]
     fn eval_bools() {
         assert_eq!(
             expression("true").unwrap(),
